@@ -1450,6 +1450,7 @@ class WashingMachineCard extends HTMLElement {
           font-size: 11px; font-weight: 800; letter-spacing: 1.4px; color: var(--wm-label);
           margin-bottom: 10px;
         }
+        .lc-program { color: var(--wm-text); letter-spacing: .4px; cursor: pointer; }
         .lc-grid { display: grid; grid-template-columns: repeat(4, 1fr); }
         .lc-item { padding: 0 12px 0 0; min-width: 0; cursor: pointer; }
         .lc-item:not(.hidden) ~ .lc-item:not(.hidden) {
@@ -1516,7 +1517,7 @@ class WashingMachineCard extends HTMLElement {
           </div>
 
           <div class="panel hidden" id="lastCycle">
-            <div class="lc-title" id="lcTitle"></div>
+            <div class="lc-title"><span id="lcTitle"></span><span class="lc-program hidden" id="lcProgram"></span></div>
             <div class="lc-grid">
               <div class="lc-item hidden" id="lcStart">
                 <div class="lc-label" id="lcStartLabel"></div>
@@ -1554,6 +1555,8 @@ class WashingMachineCard extends HTMLElement {
             this._el("plugBtn").addEventListener("click", () => this._confirmTogglePlug());
         if (c.last_wash_entity)
             this._el("lcStart").addEventListener("click", mi(c.last_wash_entity));
+        if (c.last_program_entity)
+            this._el("lcProgram").addEventListener("click", mi(c.last_program_entity));
         if (c.duration_entity)
             this._el("lcDuration").addEventListener("click", mi(c.duration_entity));
         if (c.energy_entity)
@@ -1625,9 +1628,13 @@ class WashingMachineCard extends HTMLElement {
             left !== null && ringState === "running" ? t.ring_remaining : t[`ring_${ringState}`];
         const finish = active ? this._finishDate() : null;
         const showElapsed = left !== null && !!clock;
-        this._el("elapsedInfo").innerHTML = showElapsed ? `${t.elapsed} <b>${clock}</b>` : "";
-        this._el("finishInfo").innerHTML = finish ? `${t.ends} <b>${this._fmtFinish(finish)}</b>` : "";
-        this._el("timeRow").classList.toggle("hidden", !showElapsed && !finish);
+        // With remaining/finish configured the row stays in place ("—" between cycles), so cards keep the same height.
+        const timeConfigured = !!c.remaining_entity || !!c.finish_entity;
+        this._el("elapsedInfo").innerHTML = showElapsed ? `${t.elapsed} <b>${clock}</b>`
+            : timeConfigured && !active ? `${t.elapsed} <b>—</b>` : "";
+        this._el("finishInfo").innerHTML = finish ? `${t.ends} <b>${this._fmtFinish(finish)}</b>`
+            : timeConfigured ? `${t.ends} <b>—</b>` : "";
+        this._el("timeRow").classList.toggle("hidden", !showElapsed && !finish && !timeConfigured);
         // Programme progress: progress_entity (%), else elapsed / (elapsed + remaining) from the appliance's own times.
         let pct = null;
         if (active && c.progress_entity) {
@@ -1692,6 +1699,12 @@ class WashingMachineCard extends HTMLElement {
         }
 
         let anyLc = false;
+        if (c.last_program_entity) {
+            const prog = this._entityText(c.last_program_entity);
+            this._el("lcProgram").textContent = prog ? ` · ${prog}` : "";
+            this._el("lcProgram").classList.toggle("hidden", !prog);
+            anyLc = true;
+        }
         if (c.last_wash_entity) {
             const s = this._st(c.last_wash_entity);
             this._el("lcStart").classList.remove("hidden");
@@ -2181,6 +2194,14 @@ class WashingMachineCardEditor extends HTMLElement {
                             entity: {
                                 domain: "input_datetime"
                             }
+                        },
+                    }, {
+                        key: "last_program_entity",
+                        kind: "entity",
+                        title: "Last programme entity",
+                        description: "Optional. Shown next to the panel title, e.g. \"LAST CYCLE · Cottons\".",
+                        selector: {
+                            entity: {}
                         },
                     }, {
                         key: "duration_entity",

@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- **`last_program_entity`** — the programme of the last cycle, shown next to the
+  "Last cycle" title (*LAST CYCLE · Cottons*). Optional; tapping it opens more-info.
 - **Smart-appliance details: `program_entity`, `phase_entity`, `remaining_entity`,
   `finish_entity`, `elapsed_entity`, `progress_entity`.** For an appliance that reports its own
   programme, the status line shows *programme · phase* (e.g. "Cottons · Spin")
@@ -16,7 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   The finish time comes from `finish_entity`, or is computed from the remaining
   time. A second bar under the power gauge fills with the programme progress,
   from `progress_entity` or from the elapsed and remaining times; it stays
-  visible, empty, between cycles, so cards keep the same height.
+  visible, empty, between cycles, so cards keep the same height. The
+  elapsed / finish line does the same ("—") when a remaining or finish entity is set.
   Duration sensors in s, min, h or d are all understood. All optional and
   available in a new "Program & time" section of the visual editor; cards without
   them render exactly as before.

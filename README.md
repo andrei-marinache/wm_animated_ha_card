@@ -136,6 +136,7 @@ theme: auto                                        # auto / light / dark / ha
 | `power_max` | no | `2500` | Gauge maximum, in `power_entity` units. |
 | `last_wash_entity` | no | — | `input_datetime` with the cycle start; also the source of the elapsed time. |
 | `duration_entity` | no | — | Last cycle duration in minutes. |
+| `last_program_entity` | no | — | Programme of the last cycle (e.g. an `input_text` your automation fills at the end of the cycle). Shown next to the panel title: *LAST CYCLE · Cottons*. |
 | `energy_entity` | no | — | Energy per cycle, kWh. |
 | `cost_entity` | no | — | Cost per cycle. |
 | `currency` | no | `€` | Currency symbol for the cost column. |
