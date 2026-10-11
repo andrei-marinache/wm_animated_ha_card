@@ -148,6 +148,7 @@ theme: auto                                        # auto / light / dark / ha
 | `remaining_entity` | no | — | Time left (duration sensor, s/min/h/d). The ring counts down instead of up, and the elapsed time gets its own line. |
 | `finish_entity` | no | — | Finish time (timestamp sensor). Without it, the finish time is computed from `remaining_entity`. |
 | `elapsed_entity` | no | — | Elapsed time (duration sensor). Without it, the elapsed time is counted from the cycle start. |
+| `progress_entity` | no | — | Programme progress in % — fills a second bar under the power gauge. Without it, progress is computed from `elapsed_entity` and `remaining_entity` when both are set. |
 | `duration_format` | no | minutes | `minutes`, `hhmm`. Formats the last cycle duration. When `duration_format` is set to `hhmm` and the duration is 60 minutes or longer, the value is displayed in HHhMM format (for example, 1h05). |
 | `confirm_plug_off` | no | true | Displays a confirmation popup before turning off the `plug_entity`. |
 | `language` | no | `auto` | `auto`, `en`, `ru`, `de`, `fr`, `nl` or `pt`. |
@@ -205,6 +206,7 @@ program_entity: sensor.dryer_program
 phase_entity: sensor.dryer_program_phase
 remaining_entity: sensor.dryer_remaining_time
 finish_entity: sensor.dryer_finish
+progress_entity: sensor.dryer_progress
 ```
 
 A dryer, dishwasher, oven or microwave is the same config with a different

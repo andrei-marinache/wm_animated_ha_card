@@ -34,7 +34,7 @@ class WashingMachineCard extends HTMLElement {
             badge_running: "RUNNING", badge_idle: "IDLE", badge_paused: "PAUSED", badge_off: "OFF", badge_standby: "STANDBY", badge_nodata: "NO DATA",
             state_running: "Washing", state_idle: "Idle", state_paused: "Paused", state_off: "Off", state_standby: "Standby", state_nodata: "No data",
             ring_running: "ELAPSED", ring_idle: "IDLE", ring_paused: "PAUSED", ring_off: "OFF", ring_standby: "STANDBY",
-            ring_remaining: "REMAINING", elapsed: "Elapsed", ends: "Ends at",
+            ring_remaining: "REMAINING", progress: "Program progress", elapsed: "Elapsed", ends: "Ends at",
             power: "Current power", current: "Current draw",
             last_cycle: "LAST CYCLE", start: "START", duration: "DURATION",
             energy: "ENERGY", cost: "COST",
@@ -59,7 +59,7 @@ class WashingMachineCard extends HTMLElement {
             badge_running: "В РАБОТЕ", badge_idle: "ОЖИДАНИЕ", badge_paused: "ПАУЗА", badge_off: "ВЫКЛ", badge_standby: "ОЖИДАНИЕ", badge_nodata: "НЕТ ДАННЫХ",
             state_running: "Идёт стирка", state_idle: "Ожидание", state_paused: "Пауза", state_off: "Выключено", state_standby: "Режим ожидания", state_nodata: "Нет данных",
             ring_running: "ПРОШЛО", ring_idle: "ОЖИДАНИЕ", ring_paused: "ПАУЗА", ring_off: "ВЫКЛ", ring_standby: "ОЖИДАНИЕ",
-            ring_remaining: "ОСТАЛОСЬ", elapsed: "Прошло", ends: "Окончание",
+            ring_remaining: "ОСТАЛОСЬ", progress: "Ход программы", elapsed: "Прошло", ends: "Окончание",
             power: "Текущая мощность", current: "Текущий ток",
             last_cycle: "ПОСЛЕДНИЙ ЦИКЛ", start: "СТАРТ", duration: "ДЛИТЕЛЬН.",
             energy: "РАСХОД", cost: "СТОИМОСТЬ",
@@ -83,7 +83,7 @@ class WashingMachineCard extends HTMLElement {
             badge_running: "LÄUFT", badge_idle: "BEREIT", badge_paused: "PAUSE", badge_off: "AUS", badge_standby: "STANDBY", badge_nodata: "KEINE DATEN",
             state_running: "Läuft", state_idle: "Bereit", state_paused: "Pause", state_off: "Aus", state_standby: "Standby", state_nodata: "Keine Daten",
             ring_running: "VERGANGEN", ring_idle: "BEREIT", ring_paused: "PAUSE", ring_off: "AUS", ring_standby: "STANDBY",
-            ring_remaining: "RESTZEIT", elapsed: "Vergangen", ends: "Ende um",
+            ring_remaining: "RESTZEIT", progress: "Programmfortschritt", elapsed: "Vergangen", ends: "Ende um",
             power: "Aktuelle Leistung", current: "Stromaufnahme",
             last_cycle: "LETZTER DURCHGANG", start: "START", duration: "DAUER",
             energy: "VERBRAUCH", cost: "KOSTEN",
@@ -107,7 +107,7 @@ class WashingMachineCard extends HTMLElement {
             name: "Lave-linge", badge_running: "EN MARCHE", badge_idle: "EN VEILLE", badge_paused: "EN PAUSE", badge_off: "ÉTEINT", badge_standby: "EN VEILLE", badge_nodata: "PAS DE DONNÉES",
             state_running: "Lavage en cours", state_idle: "En veille", state_paused: "En pause", state_off: "Éteint", state_standby: "En veille", state_nodata: "Pas de données",
             ring_running: "ÉCOULÉ", ring_idle: "VEILLE", ring_paused: "PAUSE", ring_off: "ÉTEINT", ring_standby: "VEILLE",
-            ring_remaining: "RESTANT", elapsed: "Écoulé", ends: "Fin à",
+            ring_remaining: "RESTANT", progress: "Progression", elapsed: "Écoulé", ends: "Fin à",
             power: "Puissance actuelle", current: "Courant instantané",
             last_cycle: "DERNIER CYCLE", start: "DÉPART", duration: "DURÉE",
             energy: "ÉNERGIE", cost: "COÛT",
@@ -132,7 +132,7 @@ class WashingMachineCard extends HTMLElement {
             badge_running: "BEZIG", badge_idle: "INACTIEF", badge_paused: "GEPAUZEERD", badge_off: "UIT", badge_standby: "STAND-BY", badge_nodata: "GEEN DATA",
             state_running: "Wast", state_idle: "Inactief", state_paused: "Gepauzeerd", state_off: "Uit", state_standby: "Stand-by", state_nodata: "Geen data",
             ring_running: "VERSTREKEN", ring_idle: "INACTIEF", ring_paused: "GEPAUZEERD", ring_off: "UIT", ring_standby: "STAND-BY",
-            ring_remaining: "RESTEREND", elapsed: "Verstreken", ends: "Klaar om",
+            ring_remaining: "RESTEREND", progress: "Voortgang", elapsed: "Verstreken", ends: "Klaar om",
             power: "Huidig vermogen", current: "Huidig verbruik",
             last_cycle: "LAATSTE CYCLUS", start: "START", duration: "DUUR",
             energy: "ENERGIE", cost: "KOSTEN",
@@ -157,7 +157,7 @@ class WashingMachineCard extends HTMLElement {
             badge_running: "EM ANDAMENTO", badge_idle: "EM ESPERA", badge_paused: "EM PAUSA", badge_off: "DESLIGADO", badge_standby: "EM ESPERA", badge_nodata: "SEM DADOS",
             state_running: "Lavando", state_idle: "Em espera", state_paused: "Em pausa", state_off: "Desligado", state_standby: "Em espera", state_nodata: "Sem dados",
             ring_running: "DECORRIDO", ring_idle: "EM ESPERA", ring_paused: "EM PAUSA", ring_off: "DESLIGADO", ring_standby: "EM ESPERA",
-            ring_remaining: "RESTANTE", elapsed: "Decorrido", ends: "Termina às",
+            ring_remaining: "RESTANTE", progress: "Progresso", elapsed: "Decorrido", ends: "Termina às",
             power: "Potência atual", current: "Corrente atual",
             last_cycle: "ÚLTIMO CICLO", start: "INÍCIO", duration: "DURAÇÃO",
             energy: "ENERGIA", cost: "CUSTO",
@@ -1445,6 +1445,7 @@ class WashingMachineCard extends HTMLElement {
           transition: width .6s ease;
         }
         .idle .bar-fill { background: var(--wm-bar-idle); }
+        .bar.progress .bar-fill { background: linear-gradient(90deg, #56a8ff, #2f80ed); }
         .lc-title {
           font-size: 11px; font-weight: 800; letter-spacing: 1.4px; color: var(--wm-label);
           margin-bottom: 10px;
@@ -1506,6 +1507,11 @@ class WashingMachineCard extends HTMLElement {
                 <span class="st-power" id="powerValue">—</span>
               </div>
               <div class="bar hidden" id="bar"><div class="bar-fill" id="barFill"></div></div>
+              <div class="st-row hidden" id="progressRow">
+                <span class="st-power-label" id="progressLabel"></span>
+                <span class="st-power" id="progressValue">—</span>
+              </div>
+              <div class="bar progress hidden" id="progressBar"><div class="bar-fill" id="progressFill"></div></div>
             </div>
           </div>
 
@@ -1540,6 +1546,8 @@ class WashingMachineCard extends HTMLElement {
         this._el("chartBtn").addEventListener("click", mi(c.power_entity || c.status_entity));
         if (c.power_entity)
             this._el("powerValue").addEventListener("click", mi(c.power_entity));
+        if (c.progress_entity)
+            this._el("progressValue").addEventListener("click", mi(c.progress_entity));
         if (c.notify_entity)
             this._el("notifyBtn").addEventListener("click", () => this._toggle(c.notify_entity));
         if (c.plug_entity)
@@ -1620,6 +1628,20 @@ class WashingMachineCard extends HTMLElement {
         this._el("elapsedInfo").innerHTML = showElapsed ? `${t.elapsed} <b>${clock}</b>` : "";
         this._el("finishInfo").innerHTML = finish ? `${t.ends} <b>${this._fmtFinish(finish)}</b>` : "";
         this._el("timeRow").classList.toggle("hidden", !showElapsed && !finish);
+        // Programme progress: progress_entity (%), else elapsed / (elapsed + remaining) from the appliance's own times.
+        let pct = null;
+        if (active && c.progress_entity) {
+            const v = parseFloat(this._st(c.progress_entity)?.state);
+            pct = isNaN(v) ? null : v;
+        } else if (active && elapsedMin !== null && left !== null) {
+            pct = 100 * elapsedMin / (elapsedMin + left);
+        }
+        pct = pct === null ? null : Math.min(100, Math.max(0, pct));
+        this._el("progressLabel").textContent = t.progress;
+        this._el("progressValue").textContent = pct === null ? "—" : `${Math.round(pct)}%`;
+        this._el("progressFill").style.width = `${pct ?? 0}%`;
+        this._el("progressRow").classList.toggle("hidden", pct === null);
+        this._el("progressBar").classList.toggle("hidden", pct === null);
         this._el("ringArc").style.display = active ? "" : "none";
         if (c.show_raw_status && !WashingMachineCard.isBooleanStatusEntity(c.status_entity)) {
             const rawState = status ? String(status.state) : "";
@@ -2043,6 +2065,16 @@ class WashingMachineCardEditor extends HTMLElement {
                         kind: "entity",
                         title: "Finish time entity",
                         description: "Optional. Timestamp sensor. Without it, the finish time is computed from the remaining time.",
+                        selector: {
+                            entity: {
+                                domain: "sensor"
+                            }
+                        },
+                    }, {
+                        key: "progress_entity",
+                        kind: "entity",
+                        title: "Progress entity (%)",
+                        description: "Optional. Fills a progress bar under the power gauge. Without it, progress is computed from the elapsed and remaining time entities when both are set.",
                         selector: {
                             entity: {
                                 domain: "sensor"

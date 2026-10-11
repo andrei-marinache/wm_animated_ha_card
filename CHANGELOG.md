@@ -8,13 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 - **Smart-appliance details: `program_entity`, `phase_entity`, `remaining_entity`,
-  `finish_entity`, `elapsed_entity`.** For an appliance that reports its own
+  `finish_entity`, `elapsed_entity`, `progress_entity`.** For an appliance that reports its own
   programme, the status line shows *programme · phase* (e.g. "Cottons · Spin")
   instead of the generic running label, using Home Assistant's own formatting so
   enum values come out translated. With `remaining_entity` the ring counts down the
   time left, and the elapsed time moves to its own line next to the finish time.
   The finish time comes from `finish_entity`, or is computed from the remaining
-  time. Duration sensors in s, min, h or d are all understood. All optional and
+  time. A second bar under the power gauge fills with the programme progress,
+  from `progress_entity` or from the elapsed and remaining times.
+  Duration sensors in s, min, h or d are all understood. All optional and
   available in a new "Program & time" section of the visual editor; cards without
   them render exactly as before.
 - **`paused_states`** — for an appliance that reports its own pause. Once set,
