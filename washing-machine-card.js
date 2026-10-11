@@ -1640,8 +1640,10 @@ class WashingMachineCard extends HTMLElement {
         this._el("progressLabel").textContent = t.progress;
         this._el("progressValue").textContent = pct === null ? "—" : `${Math.round(pct)}%`;
         this._el("progressFill").style.width = `${pct ?? 0}%`;
-        this._el("progressRow").classList.toggle("hidden", pct === null);
-        this._el("progressBar").classList.toggle("hidden", pct === null);
+        // Shown whenever progress is configured, like the power gauge, so the card keeps its height when idle.
+        const progressConfigured = !!c.progress_entity || (!!c.elapsed_entity && !!c.remaining_entity);
+        this._el("progressRow").classList.toggle("hidden", !progressConfigured);
+        this._el("progressBar").classList.toggle("hidden", !progressConfigured);
         this._el("ringArc").style.display = active ? "" : "none";
         if (c.show_raw_status && !WashingMachineCard.isBooleanStatusEntity(c.status_entity)) {
             const rawState = status ? String(status.state) : "";

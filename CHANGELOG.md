@@ -15,7 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   time left, and the elapsed time moves to its own line next to the finish time.
   The finish time comes from `finish_entity`, or is computed from the remaining
   time. A second bar under the power gauge fills with the programme progress,
-  from `progress_entity` or from the elapsed and remaining times.
+  from `progress_entity` or from the elapsed and remaining times; it stays
+  visible, empty, between cycles, so cards keep the same height.
   Duration sensors in s, min, h or d are all understood. All optional and
   available in a new "Program & time" section of the visual editor; cards without
   them render exactly as before.
