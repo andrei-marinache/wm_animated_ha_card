@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [Unreleased]
 
 ### Added
+- **Smart-appliance details: `program_entity`, `phase_entity`, `remaining_entity`,
+  `finish_entity`, `elapsed_entity`.** For an appliance that reports its own
+  programme, the status line shows *programme · phase* (e.g. "Cottons · Spin")
+  instead of the generic running label, using Home Assistant's own formatting so
+  enum values come out translated. With `remaining_entity` the ring counts down the
+  time left, and the elapsed time moves to its own line next to the finish time.
+  The finish time comes from `finish_entity`, or is computed from the remaining
+  time. Duration sensors in s, min, h or d are all understood. All optional and
+  available in a new "Program & time" section of the visual editor; cards without
+  them render exactly as before.
+- **`paused_states`** — for an appliance that reports its own pause. Once set,
+  the status entity alone decides running vs paused, so a quiet phase that draws
+  almost nothing (a soak, anti-crease, a dishwasher's drying) no longer shows as
+  *Paused* just because the plug reads below `power_threshold`. The power sensor
+  still drives the gauge and standby. Not set by default: power-based pause
+  detection is unchanged.
 - **`image_tap_action`** — choose what tapping the appliance illustration does,
   with Home Assistant's standard card actions: open another dashboard
   (`navigate`), a web page (`url`), a more-info dialog, or run an action. Handy for

@@ -142,6 +142,12 @@ theme: auto                                        # auto / light / dark / ha
 | `running_states` | no | on, washing, run, spin, rinse, … | States of `status_entity` treated as "running" (English, Russian, German, French, Dutch and Portuguese states are recognised). |
 | `hide_status_panel` | no | false | Hide status panel only when idle. |
 | `show_raw_status` | no | false | Displays the raw value of `status_entity` in the card's status panel. This is useful when a smart appliance sends its state directly. The state must still match `running_states`.|
+| `paused_states` | no | — | States of `status_entity` that mean the appliance is paused (e.g. `[pause]`). Once set, the status entity alone decides running vs paused, and `power_threshold` no longer turns a quiet phase into *paused*. |
+| `program_entity` | no | — | Running programme. Together with `phase_entity` it replaces the generic running label with *programme · phase*. |
+| `phase_entity` | no | — | Current phase (any entity whose state is worth showing, e.g. the oven temperature). |
+| `remaining_entity` | no | — | Time left (duration sensor, s/min/h/d). The ring counts down instead of up, and the elapsed time gets its own line. |
+| `finish_entity` | no | — | Finish time (timestamp sensor). Without it, the finish time is computed from `remaining_entity`. |
+| `elapsed_entity` | no | — | Elapsed time (duration sensor). Without it, the elapsed time is counted from the cycle start. |
 | `duration_format` | no | minutes | `minutes`, `hhmm`. Formats the last cycle duration. When `duration_format` is set to `hhmm` and the duration is 60 minutes or longer, the value is displayed in HHhMM format (for example, 1h05). |
 | `confirm_plug_off` | no | true | Displays a confirmation popup before turning off the `plug_entity`. |
 | `language` | no | `auto` | `auto`, `en`, `ru`, `de`, `fr`, `nl` or `pt`. |
@@ -181,6 +187,24 @@ status_entity: sensor.washer_operation_state
 plug_entity: switch.washer_power
 running_states: [run]
 show_raw_status: true
+```
+
+When the appliance also reports its programme, phase and time left, the card can
+show them: the ring counts down, and the status line reads *programme · phase*.
+`paused_states` lets the appliance's own pause decide, so a quiet phase on a
+plug with power monitoring is not shown as paused:
+
+```yaml
+type: custom:washing-machine-card
+appliance_type: dryer
+status_entity: sensor.dryer_status
+running_states: [in_use]
+paused_states: [pause]
+power_entity: sensor.dryer_plug_power
+program_entity: sensor.dryer_program
+phase_entity: sensor.dryer_program_phase
+remaining_entity: sensor.dryer_remaining_time
+finish_entity: sensor.dryer_finish
 ```
 
 A dryer, dishwasher, oven or microwave is the same config with a different

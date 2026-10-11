@@ -34,6 +34,7 @@ class WashingMachineCard extends HTMLElement {
             badge_running: "RUNNING", badge_idle: "IDLE", badge_paused: "PAUSED", badge_off: "OFF", badge_standby: "STANDBY", badge_nodata: "NO DATA",
             state_running: "Washing", state_idle: "Idle", state_paused: "Paused", state_off: "Off", state_standby: "Standby", state_nodata: "No data",
             ring_running: "ELAPSED", ring_idle: "IDLE", ring_paused: "PAUSED", ring_off: "OFF", ring_standby: "STANDBY",
+            ring_remaining: "REMAINING", elapsed: "Elapsed", ends: "Ends at",
             power: "Current power", current: "Current draw",
             last_cycle: "LAST CYCLE", start: "START", duration: "DURATION",
             energy: "ENERGY", cost: "COST",
@@ -58,6 +59,7 @@ class WashingMachineCard extends HTMLElement {
             badge_running: "В РАБОТЕ", badge_idle: "ОЖИДАНИЕ", badge_paused: "ПАУЗА", badge_off: "ВЫКЛ", badge_standby: "ОЖИДАНИЕ", badge_nodata: "НЕТ ДАННЫХ",
             state_running: "Идёт стирка", state_idle: "Ожидание", state_paused: "Пауза", state_off: "Выключено", state_standby: "Режим ожидания", state_nodata: "Нет данных",
             ring_running: "ПРОШЛО", ring_idle: "ОЖИДАНИЕ", ring_paused: "ПАУЗА", ring_off: "ВЫКЛ", ring_standby: "ОЖИДАНИЕ",
+            ring_remaining: "ОСТАЛОСЬ", elapsed: "Прошло", ends: "Окончание",
             power: "Текущая мощность", current: "Текущий ток",
             last_cycle: "ПОСЛЕДНИЙ ЦИКЛ", start: "СТАРТ", duration: "ДЛИТЕЛЬН.",
             energy: "РАСХОД", cost: "СТОИМОСТЬ",
@@ -81,6 +83,7 @@ class WashingMachineCard extends HTMLElement {
             badge_running: "LÄUFT", badge_idle: "BEREIT", badge_paused: "PAUSE", badge_off: "AUS", badge_standby: "STANDBY", badge_nodata: "KEINE DATEN",
             state_running: "Läuft", state_idle: "Bereit", state_paused: "Pause", state_off: "Aus", state_standby: "Standby", state_nodata: "Keine Daten",
             ring_running: "VERGANGEN", ring_idle: "BEREIT", ring_paused: "PAUSE", ring_off: "AUS", ring_standby: "STANDBY",
+            ring_remaining: "RESTZEIT", elapsed: "Vergangen", ends: "Ende um",
             power: "Aktuelle Leistung", current: "Stromaufnahme",
             last_cycle: "LETZTER DURCHGANG", start: "START", duration: "DAUER",
             energy: "VERBRAUCH", cost: "KOSTEN",
@@ -104,6 +107,7 @@ class WashingMachineCard extends HTMLElement {
             name: "Lave-linge", badge_running: "EN MARCHE", badge_idle: "EN VEILLE", badge_paused: "EN PAUSE", badge_off: "ÉTEINT", badge_standby: "EN VEILLE", badge_nodata: "PAS DE DONNÉES",
             state_running: "Lavage en cours", state_idle: "En veille", state_paused: "En pause", state_off: "Éteint", state_standby: "En veille", state_nodata: "Pas de données",
             ring_running: "ÉCOULÉ", ring_idle: "VEILLE", ring_paused: "PAUSE", ring_off: "ÉTEINT", ring_standby: "VEILLE",
+            ring_remaining: "RESTANT", elapsed: "Écoulé", ends: "Fin à",
             power: "Puissance actuelle", current: "Courant instantané",
             last_cycle: "DERNIER CYCLE", start: "DÉPART", duration: "DURÉE",
             energy: "ÉNERGIE", cost: "COÛT",
@@ -128,6 +132,7 @@ class WashingMachineCard extends HTMLElement {
             badge_running: "BEZIG", badge_idle: "INACTIEF", badge_paused: "GEPAUZEERD", badge_off: "UIT", badge_standby: "STAND-BY", badge_nodata: "GEEN DATA",
             state_running: "Wast", state_idle: "Inactief", state_paused: "Gepauzeerd", state_off: "Uit", state_standby: "Stand-by", state_nodata: "Geen data",
             ring_running: "VERSTREKEN", ring_idle: "INACTIEF", ring_paused: "GEPAUZEERD", ring_off: "UIT", ring_standby: "STAND-BY",
+            ring_remaining: "RESTEREND", elapsed: "Verstreken", ends: "Klaar om",
             power: "Huidig vermogen", current: "Huidig verbruik",
             last_cycle: "LAATSTE CYCLUS", start: "START", duration: "DUUR",
             energy: "ENERGIE", cost: "KOSTEN",
@@ -152,6 +157,7 @@ class WashingMachineCard extends HTMLElement {
             badge_running: "EM ANDAMENTO", badge_idle: "EM ESPERA", badge_paused: "EM PAUSA", badge_off: "DESLIGADO", badge_standby: "EM ESPERA", badge_nodata: "SEM DADOS",
             state_running: "Lavando", state_idle: "Em espera", state_paused: "Em pausa", state_off: "Desligado", state_standby: "Em espera", state_nodata: "Sem dados",
             ring_running: "DECORRIDO", ring_idle: "EM ESPERA", ring_paused: "EM PAUSA", ring_off: "DESLIGADO", ring_standby: "EM ESPERA",
+            ring_remaining: "RESTANTE", elapsed: "Decorrido", ends: "Termina às",
             power: "Potência atual", current: "Corrente atual",
             last_cycle: "ÚLTIMO CICLO", start: "INÍCIO", duration: "DURAÇÃO",
             energy: "ENERGIA", cost: "CUSTO",
@@ -256,6 +262,14 @@ class WashingMachineCard extends HTMLElement {
             ...config,
             appliance_type: WashingMachineCard.normalizeType(config.appliance_type),
         };
+        // The visual editor stores paused_states as comma-separated text.
+        if (typeof this._config.paused_states === "string") {
+            const list = this._config.paused_states.split(",").map((s) => s.trim()).filter(Boolean);
+            if (list.length)
+                this._config.paused_states = list;
+            else
+                delete this._config.paused_states;
+        }
         this._uid = `a${Math.random().toString(36).slice(2, 9)}`;
         this._built = false;
     }
@@ -349,11 +363,25 @@ class WashingMachineCard extends HTMLElement {
         return byStatus || byBinaryOn;
     }
 
+    // paused_states is opt-in: once set, the status entity alone decides running vs paused
+    // (an appliance that reports its own pause), and power no longer turns a quiet phase into "paused".
+    _statusDecidesPause() {
+        return Array.isArray(this._config.paused_states);
+    }
+
+    _cycleIsPaused() {
+        const c = this._config;
+        const status = this._st(c.status_entity);
+        const state = status ? String(status.state).toLowerCase() : "";
+        return this._statusDecidesPause() && !!status &&
+            c.paused_states.some((k) => String(k).toLowerCase() === state);
+    }
+
     _isRunning() {
         const c = this._config;
         const cycleIsActive = this._cycleIsActive();
         // Without a power sensor, the status entity is the only source of truth.
-        if (!c.power_entity)
+        if (!c.power_entity || this._statusDecidesPause())
             return cycleIsActive;
         // With a power sensor, RUNNING requires an active cycle and power consumption above the configured threshold.
         const p = parseFloat(this._st(c.power_entity)?.state);
@@ -363,6 +391,10 @@ class WashingMachineCard extends HTMLElement {
     _applianceState() {
         const c = this._config;
         const cycleIsActive = this._cycleIsActive();
+        if (this._statusDecidesPause() && cycleIsActive)
+            return "running";
+        if (this._cycleIsPaused())
+            return "paused";
         if (!c.power_entity)
             return cycleIsActive ? "running" : "off";
         const p = parseFloat(this._st(c.power_entity)?.state);
@@ -494,6 +526,55 @@ class WashingMachineCard extends HTMLElement {
             (c.last_wash_entity && this._parseDate(this._st(c.last_wash_entity)?.state)) ||
             (status && this._parseDate(status.last_changed)) ||
             null);
+    }
+
+    // A duration sensor's value in minutes, honouring its unit (s / min / h / d). null when not usable.
+    _minutesOf(entityId) {
+        const s = this._st(entityId);
+        const n = parseFloat(s?.state);
+        if (isNaN(n))
+            return null;
+        const unit = String(s.attributes?.unit_of_measurement || "min").toLowerCase();
+        const factor = { s: 1 / 60, sec: 1 / 60, h: 60, d: 1440 }[unit] ?? 1;
+        return n * factor;
+    }
+
+    _fmtMinutes(minutes) {
+        const m = Math.max(0, Math.round(minutes));
+        return `${Math.floor(m / 60)}:${String(m % 60).padStart(2, "0")}`;
+    }
+
+    // Minutes left in the cycle, or null when the appliance gives no positive remaining time.
+    _remainingMinutes() {
+        const m = this._config.remaining_entity ? this._minutesOf(this._config.remaining_entity) : null;
+        return m !== null && m > 0 ? m : null;
+    }
+
+    _finishDate() {
+        const c = this._config;
+        const d = c.finish_entity ? this._parseDate(this._st(c.finish_entity)?.state) : null;
+        if (d)
+            return d;
+        const left = this._remainingMinutes();
+        return left !== null ? new Date(Date.now() + left * 60000) : null;
+    }
+
+    _fmtFinish(d) {
+        const t = this._t;
+        const time = d.toLocaleTimeString(t.locale, {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: this._hour12(),
+        });
+        return d.toDateString() === new Date().toDateString() ? time : this._fmtDateTime(d.toISOString());
+    }
+
+    // Entity state as Home Assistant displays it (translated enum, units), or null when empty.
+    _entityText(entityId) {
+        const s = this._st(entityId);
+        if (!s || ["unknown", "unavailable", "none", ""].includes(String(s.state).toLowerCase()))
+            return null;
+        return this._hass.formatEntityState ? this._hass.formatEntityState(s) : String(s.state);
     }
 
     // Home Assistant's frontend performs standard card actions on a "hass-action" event,
@@ -1347,6 +1428,10 @@ class WashingMachineCard extends HTMLElement {
           display: flex; align-items: baseline; justify-content: space-between;
           margin-top: 9px; gap: 8px;
         }
+        .st-state.detail { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .st-time-row { margin-top: 6px; }
+        .st-time { font-size: 13px; color: var(--wm-muted); white-space: nowrap; }
+        .st-time b { color: var(--wm-text); font-weight: 800; }
         .st-power-label { font-size: 13px; color: var(--wm-muted); }
         .st-power { font-size: 18px; font-weight: 800; white-space: nowrap; cursor: pointer; }
         .bar {
@@ -1412,6 +1497,10 @@ class WashingMachineCard extends HTMLElement {
             </div>
             <div class="st-col">
               <div class="st-state" id="stState"></div>
+              <div class="st-row st-time-row hidden" id="timeRow">
+                <span class="st-time" id="elapsedInfo"></span>
+                <span class="st-time" id="finishInfo"></span>
+              </div>
               <div class="st-row hidden" id="powerRow">
                 <span class="st-power-label" id="powerLabel"></span>
                 <span class="st-power" id="powerValue">—</span>
@@ -1515,12 +1604,22 @@ class WashingMachineCard extends HTMLElement {
         const active = applianceState === "running" || applianceState === "idle" || paused;
         wrap.classList.toggle("idle", !active);
         const start = active ? this._startDate() : null;
-        const clock = start ? this._fmtClock(start) : null;
-        this._el("dispTime").textContent = active ? (clock || "0:00") : "--:--";
+        const elapsedMin = active && c.elapsed_entity ? this._minutesOf(c.elapsed_entity) : null;
+        const clock = elapsedMin !== null ? this._fmtMinutes(elapsedMin) : (start ? this._fmtClock(start) : null);
+        // With remaining_entity the ring counts down; elapsed time moves to its own line.
+        const left = active ? this._remainingMinutes() : null;
+        const ringText = left !== null ? this._fmtMinutes(left) : clock;
+        this._el("dispTime").textContent = active ? (ringText || "0:00") : "--:--";
         this._el("dispDot").setAttribute("fill", running ? "#22b263" : "#4a5871");
-        this._el("ringTime").textContent = active ? (clock || "…") : "—";
+        this._el("ringTime").textContent = active ? (ringText || "…") : "—";
         const ringState = ["running", "idle", "paused", "standby"].includes(displayState) ? displayState : "off";
-        this._el("ringLabel").textContent = t[`ring_${ringState}`];
+        this._el("ringLabel").textContent =
+            left !== null && ringState === "running" ? t.ring_remaining : t[`ring_${ringState}`];
+        const finish = active ? this._finishDate() : null;
+        const showElapsed = left !== null && !!clock;
+        this._el("elapsedInfo").innerHTML = showElapsed ? `${t.elapsed} <b>${clock}</b>` : "";
+        this._el("finishInfo").innerHTML = finish ? `${t.ends} <b>${this._fmtFinish(finish)}</b>` : "";
+        this._el("timeRow").classList.toggle("hidden", !showElapsed && !finish);
         this._el("ringArc").style.display = active ? "" : "none";
         if (c.show_raw_status && !WashingMachineCard.isBooleanStatusEntity(c.status_entity)) {
             const rawState = status ? String(status.state) : "";
@@ -1529,6 +1628,13 @@ class WashingMachineCard extends HTMLElement {
         } else {
             this._el("stState").textContent = t[`state_${displayState}`];
         }
+        // During a cycle, program and phase (when configured) replace the generic "Washing" label.
+        const detail = active
+            ? [c.program_entity, c.phase_entity].map((e) => e && this._entityText(e)).filter(Boolean)
+            : [];
+        if (detail.length)
+            this._el("stState").textContent = detail.join(" · ");
+        this._el("stState").classList.toggle("detail", detail.length > 0);
         const hideStatus = !!c.hide_status_panel && !active && applianceState !== "standby";
         this._el("statusPanel").classList.toggle("hidden", hideStatus);
         this._el("notifyBtn").title = t.tip_notify;
@@ -1897,6 +2003,61 @@ class WashingMachineCardEditor extends HTMLElement {
                         kind: "keywords",
                         title: "Running State keywords",
                         description: "Running State keywords determine when the card considers the appliance to be running. Built-in keywords for the selected language appear in blue. Add or remove keywords as needed.",
+                    }, {
+                        key: "paused_states",
+                        kind: "text",
+                        title: "Paused states (comma-separated)",
+                        description: "Optional. For an appliance that reports its own pause, e.g. \"pause\". Once set, the status entity alone decides running vs paused, and the power sensor no longer marks a quiet phase as paused.",
+                    },
+                ],
+            }, {
+                title: "Program & time",
+                icon: "mdi:timer-sand",
+                fields: [{
+                        key: "program_entity",
+                        kind: "entity",
+                        title: "Program entity",
+                        description: "Optional. Shown with the phase instead of the generic running label.",
+                        selector: {
+                            entity: {}
+                        },
+                    }, {
+                        key: "phase_entity",
+                        kind: "entity",
+                        title: "Phase entity",
+                        selector: {
+                            entity: {}
+                        },
+                    }, {
+                        key: "remaining_entity",
+                        kind: "entity",
+                        title: "Remaining time entity",
+                        description: "Optional. Duration sensor; the ring then counts down and the elapsed time gets its own line.",
+                        selector: {
+                            entity: {
+                                domain: "sensor"
+                            }
+                        },
+                    }, {
+                        key: "finish_entity",
+                        kind: "entity",
+                        title: "Finish time entity",
+                        description: "Optional. Timestamp sensor. Without it, the finish time is computed from the remaining time.",
+                        selector: {
+                            entity: {
+                                domain: "sensor"
+                            }
+                        },
+                    }, {
+                        key: "elapsed_entity",
+                        kind: "entity",
+                        title: "Elapsed time entity",
+                        description: "Optional. Duration sensor. Without it, the elapsed time is counted from the cycle start.",
+                        selector: {
+                            entity: {
+                                domain: "sensor"
+                            }
+                        },
                     },
                 ],
             }, {
